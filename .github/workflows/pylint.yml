@@ -1,7 +1,7 @@
 name: Pylint
 
 env:
-  FAIL_UNDER: "9.5"
+  FAIL_UNDER: "10.0"
   
 on: [push, pull_request]
 
