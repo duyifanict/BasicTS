@@ -24,4 +24,5 @@ jobs:
         pip install coverage
     - name: Analysing the code with pylint
       run: |
-        pylint --fail-under=${FAIL_UNDER} basicts scripts
+        pylint --fail-under=${FAIL_UNDER} basicts scripts tests
+        isort -c basicts scripts tests
