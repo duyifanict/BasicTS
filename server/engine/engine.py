@@ -1,18 +1,19 @@
 #coding:utf-8
 import os
-import traceback
-from typing import Dict, Optional, Union
+import sys
+from typing import Optional, Union
 
 import easytorch
 from easytorch.config import init_cfg
 from easytorch.device import set_device_type
-from easytorch.utils import get_logger, set_visible_devices
+from easytorch.utils import set_visible_devices
 
+sys.path.append(os.path.abspath(os.path.join(__file__,'..','..','..')))
 class inference_engine(object):
     """
     Inference engine for EasyTorch.
     """
-    
+
     def __init__(self, cfg_path: str, ckpt_path: str, device_type: str = 'gpu', gpus: Optional[str] = None):
         """
         Initializes the inference engine.
@@ -33,7 +34,7 @@ class inference_engine(object):
         set_device_type(self.device_type)
         if self.device_type != 'cpu':
             set_visible_devices(self.gpus)
-        
+
         self.runner = self.load_runner()
 
     def load_runner(self) -> easytorch.Runner:
@@ -50,7 +51,7 @@ class inference_engine(object):
 
         return runner
 
-    def inference(self, input_data: Union[list, str]) -> None:
+    def inference(self, input_data: Union[list, str]) -> tuple:
         if self.runner is None:
             raise ValueError('Runner is not loaded. Please load the runner first.')
         result = self.runner.inference_pipeline(cfg=self.cfg_dict, input_data=input_data, output_data_file_path='')

@@ -19,10 +19,15 @@ class InputData(BaseModel):
 async def inference(input_data: InputData):
     if not isinstance(input_data.data, list):
         return {"error": "Input data must be a list"}
-    predictions = engine.inference(input_data.data)
-    return {"result": predictions.tolist()}
+    predictions, datatime_list = engine.inference(input_data.data)
+    result = []
+    datatime_list = datatime_list.tolist()
+    for data in predictions.tolist():
+        data.insert(0, datatime_list.pop(0).strftime("%Y-%m-%d %H:%M:%S"))
+        result.append(data)
+    return {"result": result}
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import uvicorn
-    uvicorn.run('server.http_server:app', host=server_config.host, port=server_config.port, reload=True)
+    uvicorn.run("server.http_server:app", host=server_config.host, port=server_config.port, reload=True)

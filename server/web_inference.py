@@ -1,5 +1,4 @@
 import os
-import sys
 from typing import Optional
 import streamlit as st
 import pandas as pd
@@ -7,15 +6,15 @@ from engine.utils import get_baseline_config_dict, get_ckpt_config_dict, load_da
 from engine.engine import inference_engine
 
 @st.cache_resource
-def load_input_data(input_data_file):
+def load_input_data(data_file):
     result = []
-    for line in input_data_file.readlines():
+    for line in data_file.readlines():
         result.append(line.decode("utf-8").strip().split(","))
     return result
 
 @st.cache_resource
-def load_model(cfg_path:str, ckpt_path:str, device_type:str, gpus:Optional[str]):
-    return inference_engine(cfg_path, ckpt_path, device_type, gpus)
+def load_model(cfg:str, ckpt:str, device:str, gpu:Optional[str]):
+    return inference_engine(cfg, ckpt, device, gpu)
 
 load_model_container = st.container(border=True)
 with load_model_container:
@@ -43,7 +42,7 @@ with load_model_container:
             cfg_path = os.path.join("baselines", config_dir, config_file)
             ckpt_path = os.path.join(os.path.dirname(__file__), "..", "checkpoints", ckpt_dir, ckpt_file)
             st.write(cfg_path)
-            st.session_state['model'] = load_model(cfg_path, ckpt_path, device_type, gpus)
+            st.session_state["model"] = load_model(cfg_path, ckpt_path, device_type, gpus)
             st.write("model loaded")
 
 load_data_container = st.container(border=True)
@@ -52,14 +51,14 @@ with load_data_container:
     input_data_file = st.file_uploader("input data file", type=["csv"])
     show_data_df = None
     if input_data_file:
-        st.session_state['input_data_list'] = load_input_data(input_data_file)
-        
+        st.session_state["input_data_list"] = load_input_data(input_data_file)
+
         st.write("show input data (last 50 rows most)")
-        if len(st.session_state['input_data_list']) > 50:
-            show_data = st.session_state['input_data_list'][-50:]
+        if len(st.session_state["input_data_list"]) > 50:
+            show_data = st.session_state["input_data_list"][-50:]
         else:
-            show_data = st.session_state['input_data_list']
-        
+            show_data = st.session_state["input_data_list"]
+
         show_data_df = load_dataframe(show_data)
         st.write(show_data_df)
         st.write("data loaded")
@@ -75,19 +74,20 @@ with inference_container:
     st.write("inference")
 
     # check model loaded
-    if 'model' not in st.session_state:
+    if "model" not in st.session_state:
         st.write("model not loaded")
     else:
         if st.button("inference"):
-            st.session_state['prediction'] = st.session_state['model'].inference(st.session_state['input_data_list'])
-        if 'prediction' in st.session_state:
+            st.session_state["prediction"] = st.session_state["model"].inference(st.session_state["input_data_list"])
+        if "prediction" in st.session_state:
             st.write("inference executed")
             st.write("show prediction data (last 50 rows most)")
-            show_pred_data = st.session_state['prediction']
+            show_pred_data, datetime_data = st.session_state["prediction"]
             if len(show_pred_data) > 50:
                 show_pred_data = show_pred_data[-50:]
-            
+
             show_pred_data_df = pd.DataFrame(show_pred_data)
+            show_pred_data_df.index = datetime_data
             st.write(show_pred_data_df)
 
             if st.checkbox("show prediction plot (first 10 columns most)"):
@@ -96,9 +96,10 @@ with inference_container:
                 else:
                     st.write("no prediction data")
 
-
-            output_csv = pd.DataFrame(st.session_state['prediction']).to_csv(index=False).encode('utf-8')
-            if st.download_button('Download CSV', output_csv, file_name="prediction.csv", mime='text/csv'):
+            pred_data, datetime_data = st.session_state["prediction"]
+            output_pd = pd.DataFrame(pred_data)
+            output_pd.index = datetime_data
+            if st.download_button("Download CSV", output_pd.to_csv().encode("utf-8"), file_name="prediction.csv", mime="text/csv"):
                 st.write("download success")
 
 
