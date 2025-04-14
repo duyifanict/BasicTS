@@ -7,7 +7,7 @@ class BasicConfig(BaseSettings):
 
 class ServerConfig(BasicConfig):
     host: str = '0.0.0.0'
-    port: int = 5555
+    port: int = 5555 
 
 class ModelConfig(BasicConfig):
     cfg_path: str = 'baselines/STID/PEMS04.py'
