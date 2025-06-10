@@ -137,7 +137,9 @@ def inference_func(cfg: Dict,
                     input_data_file_path: str,
                     output_data_file_path: str,
                     ckpt_path: str,
-                    strict: bool = True) -> None:
+                    strict: bool = True,
+                    context_length: int = 0,
+                    prediction_length: int = 0) -> None:
     """
     Starts the inference process.
 
@@ -153,6 +155,8 @@ def inference_func(cfg: Dict,
         output_data_file_path (str): Path to the output data file.
         ckpt_path (str): Path to the model checkpoint. If not provided, the best model checkpoint is loaded automatically.
         strict (bool): Enforces that the checkpoint keys match the model. Defaults to True.
+        context_length (int): Context length for inference, only used for utfs models.
+        prediction_length (int): Prediction length for inference, only used for utfs models.
 
     Raises:
         Exception: Catches any exception, logs the traceback, and re-raises it.
@@ -183,7 +187,7 @@ def inference_func(cfg: Dict,
             runner.load_model(ckpt_path=ckpt_path, strict=strict)
 
         # start the inference pipeline
-        runner.inference_pipeline(cfg=cfg, input_data=input_data_file_path, output_data_file_path=output_data_file_path)
+        runner.inference_pipeline(cfg=cfg, input_data=input_data_file_path, output_data_file_path=output_data_file_path, context_length=context_length, prediction_length=prediction_length)
 
     except BaseException as e:
         # log the exception and re-raise it
@@ -195,7 +199,9 @@ def launch_inference(cfg: Union[Dict, str],
                       input_data_file_path: str,
                       output_data_file_path: str,
                       device_type: str = 'gpu',
-                      gpus: Optional[str] = None) -> None:
+                      gpus: Optional[str] = None,
+                      context_length: int = 0,
+                      prediction_length: int = 0) -> None:
     """
     Launches the inference process.
 
@@ -206,6 +212,8 @@ def launch_inference(cfg: Union[Dict, str],
         output_data_file_path (str): Path to the output data file.
         device_type (str, optional): Device type to use ('cpu' or 'gpu'). Defaults to 'gpu'.
         gpus (Optional[str]): GPU device IDs to use. Defaults to None (use all available GPUs).
+        context_length (int): Context length for inference, only used for utfs models.
+        prediction_length (int): Prediction length for inference, only used for utfs models.
 
     Raises:
         AssertionError: If the batch size is not specified in either the config or as an argument.
@@ -232,4 +240,4 @@ def launch_inference(cfg: Union[Dict, str],
         set_visible_devices(gpus)
 
     # run the inference process
-    inference_func(cfg_dict, input_data_file_path, output_data_file_path, ckpt_path)
+    inference_func(cfg_dict, input_data_file_path, output_data_file_path, ckpt_path, context_length=context_length, prediction_length=prediction_length)

@@ -563,7 +563,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
     @torch.no_grad()
     @master_only
-    def inference_pipeline(self, cfg: Optional[Dict] = None, input_data: Union[str, list] = '', output_data_file_path: str = '') -> list:
+    def inference_pipeline(self, cfg: Optional[Dict] = None, input_data: Union[str, list] = '', output_data_file_path: str = '', **kwargs) -> list:
         """
         The complete inference process.
 
@@ -571,6 +571,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
             cfg (Dict, optional): Configuration dictionary.
             input_data (Union[str, list], optional): The input data file path or data list for inference.
             output_data_file_path (str, optional): The output data file path. Defaults to '' meaning no output file.
+            **kwargs: Additional keyword arguments for flexibility in inference.
         """
 
         # if isinstance(input_data, str):
