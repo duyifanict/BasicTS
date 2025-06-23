@@ -106,6 +106,7 @@ python experiments/inference.py -cfg "baselines/ChronosBolt/config/chronos_base.
 ...
 ```
 
+---
 
 ## 🌐 Web页面
 
@@ -167,6 +168,7 @@ streamlit run server/web_inference.py
 - **支持csv格式下载数据**
 ![download](figures/download.png)
 
+---
 
 ## 🖥 API服务
 
