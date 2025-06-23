@@ -10,7 +10,9 @@ model_config = ModelConfig()
 engine = inference_engine(cfg_path=model_config.cfg_path,
                           ckpt_path=model_config.ckpt_path,
                           device_type=model_config.device_type,
-                          gpus=model_config.gpus)
+                          gpus=model_config.gpus,
+                          context_length=model_config.context_length,
+                          prediction_length=model_config.prediction_length)
 
 class InputData(BaseModel):
     data: list

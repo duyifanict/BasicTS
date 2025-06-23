@@ -2,7 +2,8 @@ import os
 from typing import Optional
 import streamlit as st
 import pandas as pd
-from engine.utils import get_baseline_config_dict, get_ckpt_config_dict, load_dataframe
+from streamlit_file_browser import st_file_browser
+from engine.utils import load_dataframe
 from engine.engine import inference_engine
 
 @st.cache_resource
@@ -13,36 +14,44 @@ def load_input_data(data_file):
     return result
 
 @st.cache_resource
-def load_model(cfg:str, ckpt:str, device:str, gpu:Optional[str]):
-    return inference_engine(cfg, ckpt, device, gpu)
+def load_model(cfg:str, ckpt:str, device:str, gpu:Optional[str],\
+               cnx_len:int, prd_len:int):
+    return inference_engine(cfg, ckpt, device, gpu,
+                            cnx_len, prd_len)
 
 load_model_container = st.container(border=True)
 with load_model_container:
     st.write("load model")
-    baseline_configs = get_baseline_config_dict()
-    config_dir = st.selectbox("config dir", list(baseline_configs.keys()))
-    config_file = st.selectbox("config file", baseline_configs[config_dir])
-
-    ckpt_configs = get_ckpt_config_dict()
-    ckpt_cfg_list = [x for x in list(ckpt_configs.keys()) if config_dir in x]
-    if len(ckpt_cfg_list) == 0:
-        st.write("no checkpoint found for this config, please train first")
+    cfg_path = ""
+    ckpt_path = ""
+    st.write("select config file")
+    cfg_selected = st_file_browser("baselines", key="cfg", glob_patterns="**/*.py", show_download_file=False, show_preview=False)
+    if cfg_selected and cfg_selected["type"] == "SELECT_FILE":
+        cfg_path = os.path.join("baselines", cfg_selected["target"]["path"])
     else:
-        ckpt_dir = st.selectbox("checkpoint dir", ckpt_cfg_list)
-        ckpt_file = st.selectbox("checkpoint file", ckpt_configs[ckpt_dir], index=len(ckpt_configs[ckpt_dir])-1)
+        st.warning("no config selected")
+
+    st.write("select checkpoint")
+    ckpt_selected = st_file_browser(".", key="ckpt", glob_patterns="**/*.pt", show_download_file=False, show_preview=False)
+    if ckpt_selected and ckpt_selected["type"] == "SELECT_FILE":
+        ckpt_path = os.path.join(os.path.dirname(__file__), "..", ckpt_selected["target"]["path"])
+    else:
+        st.warning("no checkpoint selected")
 
     device_type = st.selectbox("device type", ["cpu", "gpu", "mlu"])
     gpus = None
     if device_type == "gpu":
         gpus = st.text_input("gpus", "0")
 
-    if len(ckpt_cfg_list) != 0:
+    context_length = int(st.text_input("context length (used for utsf models)", "72"))
+    prediction_length = int(st.text_input("prediction length (used for utsf models)", "36"))
+
+    if cfg_path and ckpt_path:
         submitted = st.button("load model")
         if submitted:
-            cfg_path = os.path.join("baselines", config_dir, config_file)
-            ckpt_path = os.path.join(os.path.dirname(__file__), "..", "checkpoints", ckpt_dir, ckpt_file)
             st.write(cfg_path)
-            st.session_state["model"] = load_model(cfg_path, ckpt_path, device_type, gpus)
+            st.session_state["model"] = load_model(cfg_path, ckpt_path, device_type, gpus,\
+                                                   context_length, prediction_length)
             st.write("model loaded")
 
 load_data_container = st.container(border=True)
@@ -81,10 +90,11 @@ with inference_container:
             st.session_state["prediction"] = st.session_state["model"].inference(st.session_state["input_data_list"])
         if "prediction" in st.session_state:
             st.write("inference executed")
-            st.write("show prediction data (last 50 rows most)")
+            st.write("show prediction data (first 50 rows most)")
             show_pred_data, datetime_data = st.session_state["prediction"]
             if len(show_pred_data) > 50:
-                show_pred_data = show_pred_data[-50:]
+                show_pred_data = show_pred_data[:50]
+                datetime_data = datetime_data[:50]
 
             show_pred_data_df = pd.DataFrame(show_pred_data)
             show_pred_data_df.index = datetime_data

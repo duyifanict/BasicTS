@@ -14,7 +14,8 @@ class inference_engine(object):
     Inference engine for EasyTorch.
     """
 
-    def __init__(self, cfg_path: str, ckpt_path: str, device_type: str = 'gpu', gpus: Optional[str] = None):
+    def __init__(self, cfg_path: str, ckpt_path: str, device_type: str = 'gpu', gpus: Optional[str] = None,\
+                 context_length: int = 72, prediction_length: int = 36):
         """
         Initializes the inference engine.
 
@@ -28,6 +29,8 @@ class inference_engine(object):
         self.ckpt_path = ckpt_path
         self.device_type = device_type
         self.gpus = gpus
+        self.context_length = context_length
+        self.prediction_length = prediction_length
 
         self.cfg_dict = init_cfg(self.cfg_path, save=True)
 
@@ -54,7 +57,8 @@ class inference_engine(object):
     def inference(self, input_data: Union[list, str]) -> tuple:
         if self.runner is None:
             raise ValueError('Runner is not loaded. Please load the runner first.')
-        result = self.runner.inference_pipeline(cfg=self.cfg_dict, input_data=input_data, output_data_file_path='')
+        result = self.runner.inference_pipeline(cfg=self.cfg_dict, input_data=input_data, output_data_file_path='',
+                                                context_length=self.context_length, prediction_length=self.prediction_length)
         self.runner.meter_pool = None
         return result
 

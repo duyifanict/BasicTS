@@ -7,11 +7,13 @@ class BasicConfig(BaseSettings):
 
 class ServerConfig(BasicConfig):
     host: str = '0.0.0.0'
-    port: int = 5555 
+    port: int = 8502
 
 class ModelConfig(BasicConfig):
-    cfg_path: str = 'baselines/STID/PEMS04.py'
-    ckpt_path: str = 'checkpoints/STID/PEMS04_100_12_12/40de8ae98d3fb912c552c42197c02428/STID_best_val_MAE.pt'
-    device_type: str = 'cpu'
-    gpus: Optional[str] = None
+    cfg_path: str = 'baselines/ChronosBolt/config/chronos_base.py'
+    ckpt_path: str = 'utsf_ckpt/ChronosBolt-base-BLAST.pt'
+    device_type: str = 'gpu'
+    gpus: Optional[str] = '0'
+    context_length: int = 72
+    prediction_length: int = 24
     
