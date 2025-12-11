@@ -1,4 +1,4 @@
-name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
+name: Build and Commit Artifacts 
 
 on:
   push:
@@ -8,6 +8,11 @@ jobs:
   build:
     name: Build distribution 📦
     runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
 
     steps:
     - uses: actions/checkout@v4
@@ -30,3 +35,4 @@ jobs:
       with:
         commit_message: "build: add distribution files"
         file_pattern: "dist/*"
+        add_options: "--force"
