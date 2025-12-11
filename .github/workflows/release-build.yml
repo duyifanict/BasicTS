@@ -33,4 +33,6 @@ jobs:
       with:
         commit_message: "build: add distribution files"
         file_pattern: "dist/*"
-        add_options: "--force"
+        add_options: "-f"
+        disable_globbing: false
+        skip_dirty_check: true
