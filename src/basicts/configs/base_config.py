@@ -9,16 +9,21 @@ from enum import Enum
 from functools import partial
 from numbers import Number
 from types import FunctionType
-from typing import Callable, List, Literal, Optional, Tuple, Union
+from typing import (TYPE_CHECKING, Callable, List, Literal, Optional, Tuple,
+                    Union)
 
 import numpy as np
 import torch
-from basicts.runners.callback import BasicTSCallback
-from basicts.runners.taskflow import BasicTSTaskFlow
 from easydict import EasyDict
 from torch.optim.lr_scheduler import LRScheduler
 
 from .model_config import BasicTSModelConfig
+
+# avoid circular imports
+if TYPE_CHECKING:
+    from basicts.runners.callback import BasicTSCallback
+    from basicts.runners.taskflow import BasicTSTaskFlow
+
 
 
 @dataclass(init=False)
@@ -35,8 +40,8 @@ class BasicTSConfig(EasyDict):
     model_config: BasicTSModelConfig
 
     dataset_name: str
-    taskflow: BasicTSTaskFlow
-    callbacks: List[BasicTSCallback]
+    taskflow: "BasicTSTaskFlow"
+    callbacks: List["BasicTSCallback"]
 
     ############################## General Configuration ##############################
 
