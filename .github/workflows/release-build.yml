@@ -1,6 +1,8 @@
 name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
 
-on: push
+on:
+  push:
+    branches: [ "release/*" ]
 
 jobs:
   build:
@@ -23,8 +25,8 @@ jobs:
         --user
     - name: Build a binary wheel and a source tarball
       run: python3 -m build
-    - name: Store the distribution packages
-      uses: actions/upload-artifact@v4
+    - name: commit build artifacts
+      uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        name: python-package-distributions
-        path: dist/
+        commit_message: "build: add distribution files"
+        file_pattern: "dist/*"
