@@ -6,7 +6,7 @@ on:
 
 jobs:
   publishGitRelease:
-    if: startsWith(github.ref, 'refs/heads/release')
+    if: startsWith(github.event.base_ref, 'refs/heads/release')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
