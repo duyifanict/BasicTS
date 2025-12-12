@@ -1,0 +1,17 @@
+name: Release Draft 🚀
+on:
+  push:
+    branches: [ "release/*" ]
+
+jobs:
+  publishGitRelease:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files:  dist/*
+          draft: true
+          fail_on_unmatched_files: true
